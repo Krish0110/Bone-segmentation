@@ -1,5 +1,6 @@
 import nibabel as nib 
 import numpy as np
+import matplotlib.pyplot as plt
 
 def load_data(path):
   #loading the data
@@ -29,3 +30,24 @@ def find_bone_threshold_by_histogram(ct_array, bins=1000, hu_range=(-1000, 3000)
             return bin_centers[i]
 
     return 200  # Default fallback
+
+def visulaize_data(data, ax, title, cmap='gray', axis=1):
+  # compute middle index
+  mid = data.shape[axis] // 2
+
+  # extract the 2D slice
+  if axis == 0:
+      slice_2d = data[mid, :, :]
+  elif axis == 1:
+      slice_2d = data[:, mid, :]
+  elif axis == 2:
+      slice_2d = data[:, :, mid]
+  else:
+      raise ValueError("Axis must be 0, 1, or 2.")
+  
+  ax.imshow(slice_2d.T,
+            origin='lower',
+            cmap=cmap,
+            aspect='equal')
+  ax.set_title(f'Mid‐slice (axis {axis}) of {title}')
+  ax.axis('off')
