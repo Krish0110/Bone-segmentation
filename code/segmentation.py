@@ -6,7 +6,7 @@ from utils import load_data,find_bone_threshold_by_histogram,visulaize_data
 
 def threshold_and_label(ct_data, hu_threshold_value=150):
   # Create a binary mask where bone voxels are 1, others 0
-  bone_mask = ct_data > hu_threshold_value
+  bone_mask = (ct_data >= hu_threshold_value)
   labels, num_labels = ndimage.label(bone_mask)
   return bone_mask,labels, num_labels
 
@@ -48,13 +48,18 @@ def clean_mask(mask, min_size=1000, closing_iter=2):
 def segment_bones_combined(ct_image, ct_data, output_path, hu_threshold_value):
   fig1, axes1 = plt.subplots(3, 3, figsize=(15, 12), constrained_layout=True)
 
+  # #applying gaussian filter to smooth the edges
+  # smoothed_ct_data = ndimage.gaussian_filter(ct_data, sigma=sigma) #sigma=1.0
+
   bone_mask,labels, num_labels = threshold_and_label(ct_data, hu_threshold_value)
   # print("Bone_mask:", bone_mask)
   # print("Labels:", labels)
   print("Number of labels:", num_labels)
+
   # Visualize both
-  visulaize_data(bone_mask, axes1[0][0], "Bone-Mask")
-  visulaize_data(labels, axes1[0][1], "Labels")
+  visulaize_data(ct_data, axes1[0][0], "Actual Input")
+  visulaize_data(bone_mask, axes1[0][1], "Bone Mask")
+  visulaize_data(labels, axes1[0][2], "labels", cmap='tab10')
 
   femur_mask, tibia_mask = split_femur_tibia_by_slice(bone_mask, axis=2, cut_frac=0.5)
   visulaize_data(femur_mask, axes1[1][0], "Femur Mask")
@@ -82,4 +87,5 @@ if __name__ == '__main__':
   input_data, input_data_array = load_data(input_path)
   threshold_value = find_bone_threshold_by_histogram(input_data_array)
   output_path = "D:/bachelor/nammi/assignment-1/output/femur_tibia_mask.nii.gz"
+  
   segment_bones_combined(input_data, input_data_array,output_path, threshold_value)
