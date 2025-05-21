@@ -45,7 +45,7 @@ def clean_mask(mask, min_size=1000, closing_iter=2):
       cleaned = ndimage.binary_closing(cleaned, structure=struct)
   return cleaned
 
-def segment_bones_combined(ct_image, ct_data, output_path, hu_threshold_value):
+def segment_bones_combined(ct_image, ct_data, output_path,output_path_labeled, hu_threshold_value):
   fig1, axes1 = plt.subplots(3, 3, figsize=(15, 12), constrained_layout=True)
 
   # #applying gaussian filter to smooth the edges
@@ -68,24 +68,34 @@ def segment_bones_combined(ct_image, ct_data, output_path, hu_threshold_value):
   cleaned_femur_mask = clean_mask(femur_mask)
   cleaned_tibia_mask = clean_mask(tibia_mask)
 
+  #not labeled mask
   combined_mask = np.logical_or(cleaned_femur_mask, cleaned_tibia_mask)
-
-  visulaize_data(cleaned_femur_mask, axes1[2][0], "Cleaned Femur Mask")
-  visulaize_data(cleaned_tibia_mask, axes1[2][1], "Cleaned Tibia Mask")
-  visulaize_data(combined_mask, axes1[2][2], "Combined Mask")
-
-  plt.show()
-
   combined_image = nib.Nifti1Image(combined_mask.astype(np.uint8), ct_image.affine)
 
   nib.save(combined_image, output_path)
   print(f"Saved combined femur + tibia mask to: {output_path}")
 
+  # Encode femur as 1, tibia as 2 lableled mask
+  combined_labeled_mask = np.zeros_like(ct_data, dtype=np.uint8)
+  combined_labeled_mask[cleaned_femur_mask] = 1
+  combined_labeled_mask[cleaned_tibia_mask] = 2
+
+  combined_image_labeled = nib.Nifti1Image(combined_labeled_mask.astype(np.uint8), ct_image.affine)
+
+  nib.save(combined_image_labeled, output_path_labeled)
+  print(f"Saved combined femur + tibia mask to: {output_path_labeled}")
+
+  visulaize_data(cleaned_femur_mask, axes1[2][0], "Cleaned Femur Mask")
+  visulaize_data(cleaned_tibia_mask, axes1[2][1], "Cleaned Tibia Mask")
+  visulaize_data(combined_labeled_mask, axes1[2][2], "Combined Mask", cmap='tab10')
+
+  plt.show()
 
 if __name__ == '__main__':
   input_path = "../input/3702_left_knee.nii"
   input_data, input_data_array = load_data(input_path)
   threshold_value = find_bone_threshold_by_histogram(input_data_array)
   output_path = "D:/bachelor/nammi/assignment-1/output/femur_tibia_mask.nii.gz"
+  output_path_labeled = "D:/bachelor/nammi/assignment-1/output/femur_tibia_mask_labeled.nii.gz"
   
-  segment_bones_combined(input_data, input_data_array,output_path, threshold_value)
+  segment_bones_combined(input_data, input_data_array, output_path,output_path_labeled, threshold_value)
