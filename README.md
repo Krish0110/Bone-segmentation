@@ -41,5 +41,28 @@ pip install nibabel numpy scipy matplotlib scikit-image
 ```
 ### Clone the repository and navigate inside the repo
 ```bash
-git clone
-cd 
+git clone 
+cd NAAMII-Assignment-1
+```
+###How to run
+First navigate to code directory as
+```bash
+cd code
+```
+- `segmentation.py`: Performs segmentation of femur and tibia from the input `.nii` file.
+  ```bash
+  python segmentation.py
+  ```
+- `contour_expansion.py`: Expands the segmented bone contours using morphological dilation.
+  ```bash
+  python contour_expansion.py
+  ```
+- `randomized_contour_adjustment.py`: Expands the segmented bone contours using morphological dilation within the given expansion limit randomly.
+  ```bash
+  python randomized_contour_expansion.py
+  ```
+- `find_points_in_tibia.py`: Detects medial and lateral lowest points on the tibia mask.
+  ```bash
+  python find_points_in_tibia.py 
+  ```
+
