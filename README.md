@@ -41,7 +41,7 @@ pip install nibabel numpy scipy matplotlib scikit-image
 ```
 ### Clone the repository and navigate inside the repo
 ```bash
-git clone 
+git clone https://github.com/Krish0110/NAAMII-Assignment-1.git
 cd NAAMII-Assignment-1
 ```
 ###How to run
