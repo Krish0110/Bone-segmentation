@@ -22,10 +22,10 @@ def split_femur_tibia_by_slice(bone_mask, axis=2, cut_frac=0.5):
   # Femur: lower indices along axis < cut
   slicer = [slice(None)] * bone_mask.ndim
   slicer[axis] = slice(cut, None)
-  tibia_mask[tuple(slicer)] = bone_mask[tuple(slicer)]
+  femur_mask[tuple(slicer)] = bone_mask[tuple(slicer)]
 
   slicer[axis] = slice(None, cut)
-  femur_mask[tuple(slicer)] = bone_mask[tuple(slicer)]
+  tibia_mask[tuple(slicer)] = bone_mask[tuple(slicer)]
 
   return femur_mask, tibia_mask
 
@@ -52,14 +52,42 @@ def segment_bones_combined(ct_image, ct_data, output_path,output_path_labeled, h
   # smoothed_ct_data = ndimage.gaussian_filter(ct_data, sigma=sigma) #sigma=1.0
 
   bone_mask,labels, num_labels = threshold_and_label(ct_data, hu_threshold_value)
-  # print("Bone_mask:", bone_mask)
-  # print("Labels:", labels)
   print("Number of labels:", num_labels)
+
+  cc_labels, _ = ndimage.label(bone_mask)
+  cc_sizes = np.bincount(cc_labels.ravel())
+  cc_sizes[0] = 0  # ignore background
+  largest_cc = cc_sizes.argmax()
+  print(f"Keeping only CC #{largest_cc} of size {cc_sizes[largest_cc]}")
+  bone_mask = (cc_labels == largest_cc)
+
+  x_nonzero = np.where(bone_mask.sum(axis=(1,2))>0)[0]
+  x_mid = int((x_nonzero.min()+x_nonzero.max())/2)
+  y_mid = ct_data.shape[1]//2
+  z_mid = ct_data.shape[2]//2
+  print(f"Sagittal slice at X={x_mid}, Coronal Y={y_mid}, Axial Z={z_mid}")
+
+  fig_axes = plt.figure(figsize=(12, 4))
+  titles = ['Sagittal (axis=0)', 'Coronal (axis=1)', 'Axial (axis=2)']
+
+  for i, axis in enumerate([0, 1, 2]):
+    plt.subplot(1, 3, i + 1)
+    if axis == 0:
+      slice_img = bone_mask[x_mid, :, :]
+    elif axis == 1:
+      slice_img = bone_mask[:, y_mid, :]
+    else:
+      slice_img = bone_mask[:, :, z_mid]
+    plt.imshow(slice_img.T, cmap='gray', origin='lower')
+    plt.title(titles[i])
+    plt.axis('off')
+
+  plt.suptitle("Bone Mask Slices in All Axes", fontsize=14)
 
   # Visualize both
   visulaize_data(ct_data, axes1[0][0], "Actual Input")
   visulaize_data(bone_mask, axes1[0][1], "Bone Mask")
-  visulaize_data(labels, axes1[0][2], "labels", cmap='tab10')
+  visulaize_data(cc_labels, axes1[0][2], "labels", cmap='tab10')
 
   femur_mask, tibia_mask = split_femur_tibia_by_slice(bone_mask, axis=2, cut_frac=0.5)
   visulaize_data(femur_mask, axes1[1][0], "Femur Mask")
@@ -67,6 +95,13 @@ def segment_bones_combined(ct_image, ct_data, output_path,output_path_labeled, h
 
   cleaned_femur_mask = clean_mask(femur_mask)
   cleaned_tibia_mask = clean_mask(tibia_mask)
+
+  # Saving tibia mask
+  tibia_output_path = "D:/bachelor/nammi/assignment-1/output/tibia_only/tibia_mask_only.nii.gz"
+  tibia_image = nib.Nifti1Image(cleaned_tibia_mask.astype(np.uint8), ct_image.affine)
+  nib.save(tibia_image, tibia_output_path)
+  print(f"Saved tibia-only mask to: {tibia_output_path}")
+
 
   #not labeled mask
   combined_mask = np.logical_or(cleaned_femur_mask, cleaned_tibia_mask)

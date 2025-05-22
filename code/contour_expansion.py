@@ -51,10 +51,13 @@ def visualize_ouput(original_img,expanded_mask, labeled_expanded_mask):
   expanded_array = sitk.GetArrayFromImage(expanded_mask)
   labeled_expanded_array = sitk.GetArrayFromImage(labeled_expanded_mask)
 
+  print("Shape of the original",original_array.shape)
   # Compute mid‐slice indices
   z_mid = original_array.shape[0] // 2
   y_mid = original_array.shape[1] // 2
-  x_mid = original_array.shape[2] // 2
+  # bone-aware mid-X (sagittal)
+  x_nonzero = np.where(original_array.sum(axis=(0,1)) > 0)[0]
+  x_mid = int((x_nonzero.min() + x_nonzero.max()) / 2)
 
   fig, axes = plt.subplots(3, 3, figsize=(15, 12))
 
@@ -66,15 +69,15 @@ def visualize_ouput(original_img,expanded_mask, labeled_expanded_mask):
 
   for col, (orig_slice, exp_slice, label_slice, title) in enumerate(plane_slices):
     # Row 0: original
-    axes[0, col].imshow(orig_slice, cmap='gray')
+    axes[0, col].imshow(orig_slice.T, cmap='gray')
     axes[0, col].set_title(f"Original {title}")
     axes[0, col].axis('off')
     # Row 1: expanded
-    axes[1, col].imshow(exp_slice, cmap='gray')
+    axes[1, col].imshow(exp_slice.T, cmap='gray')
     axes[1, col].set_title(f"Expanded {title}")
     axes[1, col].axis('off')
     # Row 2: labelled (0=bg black,1=orig blue,2=ring red)
-    axes[2, col].imshow(label_slice, cmap='tab10')
+    axes[2, col].imshow(label_slice.T, cmap='tab10')
     axes[2, col].set_title(f"Labelled {title}")
     axes[2, col].axis('off')
 
@@ -83,9 +86,9 @@ def visualize_ouput(original_img,expanded_mask, labeled_expanded_mask):
 
 if __name__ == '__main__':
   #parameter definition
-  input_mask = "../output/femur_tibia_mask.nii.gz"
-  output_mask = "../output/femur_tibia_mask_2mm_expanded.nii.gz"
-  labeled_output_mask = "../output/femur_tibia_mask_2mm_expanded_labeled.nii.gz"
+  input_mask = "../output/tibia_only/tibia_mask_only.nii.gz"
+  output_mask = "../output/tibia_only/tibia_mask_only_2mm_expanded.nii.gz"
+  labeled_output_mask = "../output/tibia_only/tibia_mask_only_2mm_expanded_labeled.nii.gz"
 
   #expansion value
   expand_mm = 2.0
