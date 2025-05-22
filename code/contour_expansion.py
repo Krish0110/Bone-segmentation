@@ -86,12 +86,12 @@ def visualize_ouput(original_img,expanded_mask, labeled_expanded_mask):
 
 if __name__ == '__main__':
   #parameter definition
-  input_mask = "../output/tibia_only/tibia_mask_only.nii.gz"
-  output_mask = "../output/tibia_only/tibia_mask_only_2mm_expanded.nii.gz"
-  labeled_output_mask = "../output/tibia_only/tibia_mask_only_2mm_expanded_labeled.nii.gz"
+  input_mask = "../output/femur_tibia_mask.nii.gz"
+  output_mask = "../output/femur_tibia_mask_4mm_expanded.nii.gz"
+  labeled_output_mask = "../output/femur_tibia_mask_4mm_expanded_labeled.nii.gz"
 
   #expansion value
-  expand_mm = 2.0
+  expand_mm = 4.0
   fg_value = 1
 
   # Load original image and convert to numpy

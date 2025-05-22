@@ -80,13 +80,13 @@ def visualize_masks(original_mask, expanded_mask, random_mask, labeled_mask=None
   plt.show()
 
 if __name__ == "__main__":
-  original_mask_path = "../output/tibia_only/tibia_mask_only.nii.gz"
-  expanded_2mm_path = "../output/tibia_only/tibia_mask_only_2mm_expanded.nii.gz"
-  expanded_4mm_path = "../output/tibia_only/tibia_mask_only_4mm_expanded.nii.gz"
+  original_mask_path = "../output/femur_tibia_mask.nii.gz"
+  expanded_2mm_path = "../output/femur_tibia_mask_2mm_expanded.nii.gz"
+  expanded_4mm_path = "../output/femur_tibia_mask_4mm_expanded.nii.gz"
   max_expanded_2mm = 2.0
   max_expanded_4mm = 4.0
-  output_path_2mm = "../output/tibia_only/random_mask1_tibia.nii.gz"
-  output_path_4mm = "../output/tibia_only/random_mask2_tibia.nii.gz"
+  output_path_2mm = "../output/femur_tibia_mask_random_mask1.nii.gz"
+  output_path_4mm = "../output/femur_tibia_mask_random_mask2.nii.gz"
 
 
   original_mask = sitk.ReadImage(original_mask_path)
