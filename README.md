@@ -41,8 +41,8 @@ pip install nibabel numpy scipy matplotlib scikit-image
 ```
 ### Clone the repository and navigate inside the repo
 ```bash
-git clone https://github.com/Krish0110/NAAMII-Assignment-1.git
-cd NAAMII-Assignment-1
+git clone https://github.com/Krish0110/Bone-segmentation.git
+cd Bone-segmentation
 ```
 ###How to run
 First navigate to code directory as
